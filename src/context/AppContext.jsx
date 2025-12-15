@@ -15,10 +15,10 @@ export const AppContext = createContext();
         setLoading(false);
         let url = `${baseUrl}get-blogs?page=${page}`;
         if(tag){
-            baseUrl += `&tag=${tag}`;
+            url += `&tag=${tag}`;
         }
         if(category){
-            baseUrl += `&category=${category}`;
+            url += `&category=${category}`;
         }
         try {
             const result = await fetch(url);

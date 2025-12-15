@@ -1,31 +1,34 @@
-
 import { Header } from './components/Header'
 import {Blogs} from "./components/Blogs"
 import {Pagination} from "./components/Pagination"
 import { useContext, useEffect } from 'react'
 import { AppContext } from './context/AppContext'
-import { Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { Route, Routes, useLocation, useSearchParams } from 'react-router-dom'
+import { Home } from './Pages/Home'
+import { BlogPage} from './Pages/BlogPage'
+import {TagPage} from "./Pages/TagPage"
+import {CategoryPage} from "./Pages/CategoryPage"
 
 
 function App() {
   
   const {fetchBlogData} = useContext(AppContext);
-  const [SearchParams,setSearchParams] = useParams();
+  const [searchParams, setSearchParams] = useSearchParams(); 
   const location = useLocation();
 
 
   useEffect(() => {
-    const page = SearchParams.get("page") && 1;
+    const page = searchParams.get("page") || 1; 
     if (location.pathname.includes("tag")) {
       const tag = location.pathname.split("/").at(-1).replace("-", " ");
       fetchBlogData(Number(page), tag);
     } else if (location.pathname.includes("categories")) {
       const category = location.pathname.split("/").at(-1).replace("-", " ");
-      fetchBlogData(Number(page),null,category);
+      fetchBlogData(Number(page), null, category);
     } else {
-       fetchBlogData();
+       fetchBlogData(Number(page));
     }
-  }, [location.pathname,location.search]);
+  }, [location.pathname, location.search]);
 
   return (
     <Routes>
