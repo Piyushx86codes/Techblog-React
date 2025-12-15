@@ -1,68 +1,66 @@
-import React, { useContext, useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import Header from "../Components/Header";
+import { Navigate, useLocation, useNavigate, useNavigation } from "react-router";
 import { AppContext } from "../context/AppContext";
 import { baseUrl } from "../baseUrl";
-import { Header } from "../components/Header";
+import BlogDetails from "../Components/BlogDetails";
+import Spinner from "../Components/Spinner";
 
-export const BlogPage = () => {
-  const { setLoading, loading } = useContext(AppContext);
-  const [Blog, setBlog] = useState(null);
-  const [RelatedBlogs, setRelatedBlogs] = useState([]);
-
-  const navigate = useNavigate();
+const BlogPage = () => {
+  const [blog, setBlog] = useState(null);
+  const [relatedBlogs, setRelatedBlogs] = useState([]);
   const location = useLocation();
-
+  const navigation = Navigate();
+  const { loading, setLoading } = useContext(AppContext);
   const blogId = location.pathname.split("/").at(-1);
 
   async function fetchRelatedBlogs() {
     setLoading(true);
-    let url = `${baseUrl}?blogsId=${blogId}`;
+    let url = `${baseUrl}?blogId=${blogId}`;
+    console.log("URL: ",url)
     try {
-        const res = await fetch(url);
-        const data = await res.json();
-        setBlog(data.blog);
-        setRelatedBlogs(data.RelatedBlogs);
+      const res = await fetch(url);
+      const data = await res.json();
+      console.log(data);
+      setBlog(data.blog);
+      setRelatedBlogs(data.relatedBlogs);
     } catch (error) {
-        console.log("Something Went Wrong");
-        setBlog(null);
-        setRelatedBlogs([]);
+      console.log(error);
+      setBlog(null);
+      setRelatedBlogs([]);
     }
     setLoading(false);
   }
 
-
-  useEffect(()=>{
-    if(blogId){
-        fetchRelatedBlogs();
+  useEffect(() => {
+    if (blogId) {
+      fetchRelatedBlogs();
     }
-  },[location.pathname])
+  }, [location.pathname]);
 
   return (
     <div>
-        <Header/>
+      <Header />
+      <div>
+        <button onClick={() => navigation(-1)}>Back</button>
+      </div>
+      {loading ? (
+        <Spinner></Spinner>
+      ) : blog ? (
         <div>
-            <button onClick={()=>navigate(-1)}>
-                Back
-            </button>
+          <BlogDetails post={blog}></BlogDetails>
+          <h2>Related Blogs</h2>
+          {relatedBlogs.map((post) => {
+            <div key={post.id}>
+              <BlogDetails post={post}></BlogDetails>
+            </div>;
+          })}
         </div>
-        {
-            loading ? (<div><p>Loading</p></div>) : blog ? (
-                <div>
-                <BlogDetails post={Blog}/>
-                <h2> Related Blogs</h2>
-                {
-                    RelatedBlogs.map((post)=>{
-                        return <div key={post.id}>
-                            <BlogDetails post={post}/>
-                        </div>
-                    })
-                }
-                </div>) : 
-                (
-                    <div>
-                       <p>No Blog Found</p>
-                    </div>)
-        }
+      ) : (
+        <div>😔 Sorry... No Posts Found</div>
+      )}
     </div>
   );
 };
+
+export default BlogPage;
